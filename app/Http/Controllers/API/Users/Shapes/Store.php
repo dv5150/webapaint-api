@@ -5,9 +5,9 @@ namespace App\Http\Controllers\API\Users\Shapes;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\API\StoreShapeRequest;
 use App\Http\Resources\ShapeResource;
+use App\Http\Services\AuthService;
 use App\Http\Services\ShapeService;
 use App\Models\User;
-use Illuminate\Http\JsonResponse;
 
 class Store extends Controller
 {
@@ -34,12 +34,14 @@ class Store extends Controller
      * @param User              $user
      * @param StoreShapeRequest $request
      *
-     * @return JsonResponse
+     * @return ShapeResource
      */
-    public function __invoke(User $user, StoreShapeRequest $request)
+    public function __invoke(User $user, StoreShapeRequest $request): ShapeResource
     {
-        $shape = $this->shapeService->createShape($user, $request->all());
+        AuthService::checkToken($user, $request);
 
-        return response()->json(ShapeResource::make($shape), 200);
+        return ShapeResource::make(
+            $this->shapeService->createShape($user, $request->all())
+        );
     }
 }

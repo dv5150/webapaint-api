@@ -5,7 +5,7 @@ namespace App\Http\Controllers\API\Users\Worksheets;
 use App\Http\Controllers\Controller;
 use App\Http\Resources\WorksheetResource;
 use App\Models\User;
-use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
 
 class Index extends Controller
 {
@@ -13,18 +13,15 @@ class Index extends Controller
      *
      * @param User $user
      *
-     * @return JsonResponse
+     * @return AnonymousResourceCollection
      */
-    public function __invoke(User $user): JsonResponse
+    public function __invoke(User $user): AnonymousResourceCollection
     {
         $user->loadMissing(
             'worksheets.circles',
-            'worksheets.rectangles',
-            'worksheets.user'
+            'worksheets.rectangles'
         );
 
-        return response()->json(
-            WorksheetResource::collection($user->worksheets),200
-        );
+        return WorksheetResource::collection($user->worksheets);
     }
 }

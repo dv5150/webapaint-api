@@ -4,7 +4,8 @@ namespace App\Http\Controllers\API\Users\Worksheets\Shapes;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\API\StoreShapeInWorksheetRequest;
-use App\Http\Resources\WorksheetResource;
+use App\Http\Services\AuthService;
+use App\Http\Services\ShapeService;
 use App\Http\Services\WorksheetService;
 use App\Models\User;
 use App\Models\Worksheet;
@@ -35,15 +36,18 @@ class Store extends Controller
      * @param User                         $user
      * @param Worksheet                    $worksheet
      * @param StoreShapeInWorksheetRequest $request
+     * @param ShapeService                 $shapeService
      *
      * @return JsonResponse
      */
-    public function __invoke(User $user, Worksheet $worksheet, StoreShapeInWorksheetRequest $request)
+    public function __invoke(User $user, Worksheet $worksheet, StoreShapeInWorksheetRequest $request, ShapeService $shapeService)
     {
-        abort_if(!$worksheet->user->is($user), 403);
+        AuthService::checkToken($user, $request);
 
-        $data = $this->worksheetService->addShape($worksheet, $request->all());
-
-        return response()->json($data, 200);
+        return response()->json(
+            $this->worksheetService->addShape(
+                $user, $worksheet, $request->all(), $shapeService
+            ), 201
+        );
     }
 }

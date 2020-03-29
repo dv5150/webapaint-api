@@ -2,9 +2,7 @@
 
 namespace App\Http\Requests\API;
 
-use App\Models\User;
 use Illuminate\Foundation\Http\FormRequest;
-use Illuminate\Validation\Rule;
 
 class StoreWorksheetRequest extends FormRequest
 {
@@ -25,11 +23,8 @@ class StoreWorksheetRequest extends FormRequest
      */
     public function rules()
     {
-        $users = User::query()->pluck('id')->toArray();
-
         return [
-            'title' => 'required|string|max:255',
-            'user_id' => [ 'required', Rule::in($users) ]
+            'title' => 'required|string|max:255'
         ];
     }
 }

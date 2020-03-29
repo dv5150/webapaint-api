@@ -12,10 +12,10 @@ class ColorsTableSeeder extends Seeder
      */
     public function run()
     {
-        foreach(['red', 'green', 'blue'] as $color) {
-            DB::table('colors')->insert([
-                'code' => $color
-            ]);
-        }
+        DB::table('colors')->insert([
+            ['code' => 'red'],
+            ['code' => 'green'],
+            ['code' => 'blue'],
+        ]);
     }
 }

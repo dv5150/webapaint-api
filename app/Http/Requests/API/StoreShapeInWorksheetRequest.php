@@ -2,9 +2,7 @@
 
 namespace App\Http\Requests\API;
 
-use App\Models\Shapes\Circle;
-use App\Models\User;
-use App\Models\Worksheet;
+use App\Http\Services\ShapeService;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
 
@@ -20,16 +18,19 @@ class StoreShapeInWorksheetRequest extends FormRequest
         return true;
     }
 
+
     /**
      * Get the validation rules that apply to the request.
      *
+     * @param ShapeService $shapeService
+     *
      * @return array
      */
-    public function rules()
+    public function rules(ShapeService $shapeService)
     {
         return [
             'id' => [ 'required', 'integer' ],
-            'type' => [ 'required', Rule::in(array_keys(config('shapes.list'))) ],
+            'type' => [ 'required', Rule::in($shapeService->getAvailableShapeKeys()) ],
             'x' => [ 'required', 'numeric' ],
             'y' => [ 'required', 'numeric' ]
         ];

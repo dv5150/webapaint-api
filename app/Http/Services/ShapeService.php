@@ -1,32 +1,13 @@
 <?php
 
-
 namespace App\Http\Services;
 
-
 use App\Models\Shape;
-use App\Models\Shapes\Circle;
-use App\Models\Shapes\Rectangle;
 use App\Models\User;
-use App\Models\Worksheet;
-use Illuminate\Support\Arr;
 use Illuminate\Support\Collection;
 
 class ShapeService
 {
-    /**
-     * @param Worksheet $worksheet
-     *
-     * @return Collection
-     */
-    public function getShapesForWorksheet(Worksheet $worksheet): Collection
-    {
-        return $worksheet->circles
-                         ->toBase()
-                         ->concat($worksheet->rectangles);
-    }
-
-
     /**
      * @param User $user
      *
@@ -36,29 +17,24 @@ class ShapeService
     {
         $user->loadMissing('worksheets.circles', 'worksheets.rectangles');
 
-        $shapes = new Collection();
-
-        $user->worksheets->each(function (Worksheet $ws) use ($shapes) {
-            $shapes->push($this->getShapesForWorksheet($ws));
-        });
-
-        return $shapes->collapse();
+        return $user->circles->concat($user->rectangles);
     }
 
 
     /**
-     * @param User $user
-     * @param int  $id
+     * @param User   $user
+     * @param string $type
+     * @param int    $id
      *
      * @return Shape|null
      */
-    public function findShapeForUser(User $user, int $id): ?Shape
+    public function findShapeForUser(User $user, string $type, int $id): ?Shape
     {
-        $user->loadMissing('worksheets.circles', 'worksheets.rectangles');
+        $this->checkSupportedShape($type);
 
-        return $this->getShapesForUser($user)
-                    ->where('id', '=', $id)
-                    ->first();
+        return $this->getAvailableShapes()[$type]::query()
+                                                 ->where('user_id', '=', $user->id)
+                                                 ->findOrFail($id);
     }
 
 
@@ -70,17 +46,41 @@ class ShapeService
      */
     public function createShape(User $user, array $data): Shape
     {
+        $this->checkSupportedShape($data['type']);
+
         $data = array_merge($data, [
             'user_id' => $user->id
         ]);
 
-        switch ($data['type']) {
-            case 'rectangle':
-                return Rectangle::query()->create($data);
-                break;
-            case 'circle':
-                return Circle::query()->create($data);
-                break;
+        return $this->getAvailableShapes()[$data['type']]::query()->create($data);
+    }
+
+
+    /**
+     * @param string $type
+     */
+    public function checkSupportedShape(string $type): void
+    {
+        if (!in_array($type, $this->getAvailableShapeKeys())) {
+            abort(422, 'Given shape is not supported.');
         }
+    }
+
+
+    /**
+     * @return array
+     */
+    public function getAvailableShapeKeys(): array
+    {
+        return array_keys(config('shapes.list'));
+    }
+
+
+    /**
+     * @return array
+     */
+    public function getAvailableShapes(): array
+    {
+        return config('shapes.list');
     }
 }

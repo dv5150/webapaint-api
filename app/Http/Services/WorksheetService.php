@@ -2,8 +2,6 @@
 
 namespace App\Http\Services;
 
-use App\Models\Shapes\Circle;
-use App\Models\Shapes\Rectangle;
 use App\Models\User;
 use App\Models\Worksheet;
 use Illuminate\Http\JsonResponse;
@@ -27,23 +25,32 @@ class WorksheetService
 
 
     /**
-     * @param Worksheet $worksheet
-     * @param array     $data
+     * @param User         $user
+     * @param Worksheet    $worksheet
+     * @param array        $data
+     *
+     * @param ShapeService $shapeService
      *
      * @return JsonResponse
      */
-    public function addShape(Worksheet $worksheet, array $data): JsonResponse
+    public function addShape(User $user, Worksheet $worksheet, array $data, ShapeService $shapeService): JsonResponse
     {
-        $data['type'] === 'circle'
-            ? Circle::query()->findOrFail($data['id'])
-            : Rectangle::query()->findOrFail($data['id']);
+        $shapeService->checkSupportedShape($data['type']);
+
+        abort_if(!$worksheet->user->is($user), 403);
+
+        $shapeService->getAvailableShapes()[$data['type']]::query()->findOrFail($data['id']);
+
+        $timestamp = now();
 
         $data = [
             'worksheet_id' => $worksheet->id,
-            'shapelike_type' => config('shapes.list')[$data['type']],
+            'shapelike_type' => $shapeService->getAvailableShapes()[$data['type']],
             'shapelike_id' => $data['id'],
             'x' => $data['x'],
             'y' => $data['y'],
+            'created_at' => $timestamp,
+            'updated_at' => $timestamp
         ];
 
         DB::table('shapes')->insert($data);

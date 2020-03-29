@@ -28,16 +28,16 @@ class Show extends Controller
 
 
     /**
-     * @param User $user
-     * @param int  $id
+     * @param User   $user
+     * @param string $type
+     * @param int    $id
      *
-     * @return JsonResponse
+     * @return ShapeResource
      */
-    public function __invoke(User $user, int $id): JsonResponse
+    public function __invoke(User $user, string $type, int $id): ShapeResource
     {
-        return response()->json(
-            ShapeResource::make($this->shapeService->findShapeForUser($user, $id)),
-            200
+        return ShapeResource::make(
+            $this->shapeService->findShapeForUser($user, $type, $id)
         );
     }
 }

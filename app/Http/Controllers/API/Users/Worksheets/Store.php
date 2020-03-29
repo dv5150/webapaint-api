@@ -5,6 +5,7 @@ namespace App\Http\Controllers\API\Users\Worksheets;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\API\StoreWorksheetRequest;
 use App\Http\Resources\WorksheetResource;
+use App\Http\Services\AuthService;
 use App\Http\Services\WorksheetService;
 use App\Models\User;
 use Illuminate\Http\JsonResponse;
@@ -34,12 +35,14 @@ class Store extends Controller
      * @param User                  $user
      * @param StoreWorksheetRequest $request
      *
-     * @return JsonResponse
+     * @return WorksheetResource
      */
-    public function __invoke(User $user, StoreWorksheetRequest $request)
+    public function __invoke(User $user, StoreWorksheetRequest $request): WorksheetResource
     {
-        $worksheet = $this->worksheetService->createWorksheet($user, $request->all());
+        AuthService::checkToken($user, $request);
 
-        return response()->json(WorksheetResource::make($worksheet), 200);
+        return WorksheetResource::make(
+            $this->worksheetService->createWorksheet($user, $request->all())
+        );
     }
 }

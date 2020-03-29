@@ -2,7 +2,8 @@
 
 namespace App\Models;
 
-use Illuminate\Contracts\Auth\MustVerifyEmail;
+use App\Models\Shapes\Circle;
+use App\Models\Shapes\Rectangle;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Foundation\Auth\User as Authenticatable;
@@ -27,7 +28,7 @@ class User extends Authenticatable
      * @var array
      */
     protected $hidden = [
-        'password', 'remember_token',
+        'password', 'remember_token', 'api_token',
     ];
 
     /**
@@ -46,5 +47,23 @@ class User extends Authenticatable
     public function worksheets(): HasMany
     {
         return $this->hasMany(Worksheet::class);
+    }
+
+
+    /**
+     * @return HasMany
+     */
+    public function circles(): HasMany
+    {
+        return $this->hasMany(Circle::class);
+    }
+
+
+    /**
+     * @return HasMany
+     */
+    public function rectangles(): HasMany
+    {
+        return $this->hasMany(Rectangle::class);
     }
 }

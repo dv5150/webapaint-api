@@ -16,8 +16,8 @@ use Illuminate\Support\Facades\Route;
 Route::group(['prefix' => 'users/{user}', 'as' => 'users.', 'namespace' => 'Users'], function() {
     Route::group(['prefix' => 'shapes', 'as' => 'shapes.', 'namespace' => 'Shapes'], function() {
         Route::get('/', 'Index')->name('index');
-        Route::get('{shape}', 'Show')->name('show');
         Route::post('/', 'Store')->name('store');
+        Route::get('{type}/{shape}', 'Show')->name('show');
     });
     Route::group(['prefix' => 'worksheets', 'as' => 'worksheets.', 'namespace' => 'Worksheets'], function() {
         Route::get('/', 'Index')->name('index');

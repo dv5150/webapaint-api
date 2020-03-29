@@ -6,7 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Resources\ShapeResource;
 use App\Http\Services\ShapeService;
 use App\Models\User;
-use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
 
 class Index extends Controller
 {
@@ -30,14 +30,12 @@ class Index extends Controller
     /**
      * @param User $user
      *
-     * @return JsonResponse
+     * @return AnonymousResourceCollection
      */
-    public function __invoke(User $user): JsonResponse
+    public function __invoke(User $user): AnonymousResourceCollection
     {
-        return response()->json(
-            ShapeResource::collection(
-                $this->shapeService->getShapesForUser($user)
-            ), 200
+        return ShapeResource::collection(
+            $this->shapeService->getShapesForUser($user)
         );
     }
 }
